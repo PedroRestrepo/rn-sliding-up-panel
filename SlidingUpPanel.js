@@ -9,7 +9,8 @@ import {
   BackHandler,
   Animated,
   PanResponder,
-  Platform
+  Platform,
+  Image
 } from 'react-native'
 
 import closest from './libs/closest'
@@ -53,6 +54,7 @@ class SlidingUpPanel extends React.PureComponent {
     allowDragging: PropTypes.bool,
     showBackdrop: PropTypes.bool,
     backdropOpacity: PropTypes.number,
+    backdropImage: PropTypes.string,
     friction: PropTypes.number,
     containerStyle: ViewPropTypes.style,
     backdropStyle: ViewPropTypes.style,
@@ -76,6 +78,7 @@ class SlidingUpPanel extends React.PureComponent {
     allowDragging: true,
     showBackdrop: true,
     backdropOpacity: 0.75,
+    backdropImage: '',
     friction: Constants.DEFAULT_FRICTION,
     onBottomReached: () => null,
   }
@@ -402,7 +405,9 @@ class SlidingUpPanel extends React.PureComponent {
         onTouchStart={() => this._flick.stop()}
         onTouchEnd={() => this.hide()}
         style={[styles.backdrop, backdropStyle, {opacity: backdropOpacity}]}
-      />
+      >
+        {backdropImage && <Image source={{ uri: backdropImage }} />}
+      </Animated.View>
     )
   }
 
