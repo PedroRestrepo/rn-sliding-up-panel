@@ -80,7 +80,7 @@ class SlidingUpPanel extends React.PureComponent {
     backdropOpacity: 0.75,
     backdropImage: '',
     friction: Constants.DEFAULT_FRICTION,
-    onBottomReached: () => null,
+    onBottomReached: () => null
   }
 
   // eslint-disable-next-line react/sort-comp
@@ -284,7 +284,7 @@ class SlidingUpPanel extends React.PureComponent {
     const isAtBottom = this._isAtBottom(value)
 
     if (isAtBottom) {
-      this.props.onBottomReached();
+      this.props.onBottomReached()
       Keyboard.dismiss()
     }
 
@@ -389,7 +389,7 @@ class SlidingUpPanel extends React.PureComponent {
     }
 
     const {top, bottom} = this.props.draggableRange
-    const {backdropStyle} = this.props
+    const {backdropStyle, backdropImage} = this.props
 
     const backdropOpacity = this.props.animatedValue.interpolate({
       inputRange: [bottom, top],
@@ -404,9 +404,13 @@ class SlidingUpPanel extends React.PureComponent {
         ref={c => (this._backdrop = c)}
         onTouchStart={() => this._flick.stop()}
         onTouchEnd={() => this.hide()}
-        style={[styles.backdrop, backdropStyle, {opacity: backdropOpacity}]}
-      >
-        {backdropImage && <Image source={{ uri: backdropImage }} />}
+        style={[styles.backdrop, backdropStyle, {opacity: backdropOpacity}]}>
+        {backdropImage && (
+          <Image
+            style={{width: 100, height: 100}}
+            source={{uri: backdropImage}}
+          />
+        )}
       </Animated.View>
     )
   }
