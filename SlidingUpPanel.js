@@ -383,13 +383,29 @@ class SlidingUpPanel extends React.PureComponent {
     })
   }
 
+  _renderBackdropImage() {
+    const {backdropImage} = this.props
+
+    console.log(backdropImage)
+    if (!backdropImage) {
+      return null
+    }
+
+    return (
+      <Image
+        source={{uri: backdropImage}}
+        style={{width: '100%', height: '100%'}}
+      />
+    )
+  }
+
   _renderBackdrop() {
     if (!this.props.showBackdrop) {
       return null
     }
 
     const {top, bottom} = this.props.draggableRange
-    const {backdropStyle, backdropImage} = this.props
+    const {backdropStyle} = this.props
 
     const backdropOpacity = this.props.animatedValue.interpolate({
       inputRange: [bottom, top],
@@ -405,12 +421,7 @@ class SlidingUpPanel extends React.PureComponent {
         onTouchStart={() => this._flick.stop()}
         onTouchEnd={() => this.hide()}
         style={[styles.backdrop, backdropStyle, {opacity: backdropOpacity}]}>
-        {backdropImage && (
-          <Image
-            style={{width: 100, height: 100}}
-            source={{uri: backdropImage}}
-          />
-        )}
+        {this._renderBackdropImage()}
       </Animated.View>
     )
   }
