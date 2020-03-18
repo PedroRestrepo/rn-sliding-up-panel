@@ -399,7 +399,6 @@ class SlidingUpPanel extends React.PureComponent {
     const {backdropStyle, backdropImage, backdropImageHeight} = this.props
 
     if (!backdropImage) {
-      console.log('here')
       const backdropOpacity = this.props.animatedValue.interpolate({
         inputRange: [bottom, top],
         outputRange: [0, this.props.backdropOpacity],
@@ -493,7 +492,6 @@ class SlidingUpPanel extends React.PureComponent {
   }
 
   render() {
-    // console.log('my value', this.state.currentValue)
     return [this._renderBackdrop(), this._renderContent()]
   }
 
