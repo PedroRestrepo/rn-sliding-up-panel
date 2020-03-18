@@ -398,13 +398,14 @@ class SlidingUpPanel extends React.PureComponent {
     const {top, bottom} = this.props.draggableRange
     const {backdropStyle, backdropImage, backdropImageHeight} = this.props
 
-    const backdropOpacity = this.props.animatedValue.interpolate({
-      inputRange: [bottom, Math.min(top, backdropImageHeight)],
-      outputRange: [0, this.props.backdropOpacity],
-      extrapolate: 'clamp'
-    })
-
     if (!backdropImage) {
+      console.log('here')
+      const backdropOpacity = this.props.animatedValue.interpolate({
+        inputRange: [bottom, top],
+        outputRange: [0, this.props.backdropOpacity],
+        extrapolate: 'clamp'
+      })
+
       return (
         <Animated.View
           key="backdrop"
@@ -412,9 +413,16 @@ class SlidingUpPanel extends React.PureComponent {
           ref={c => (this._backdrop = c)}
           onTouchStart={() => this._flick.stop()}
           onTouchEnd={() => this.hide()}
-          style={[styles.backdrop, backdropStyle, {opacity: backdropOpacity}]} />
+          style={[styles.backdrop, backdropStyle, {opacity: backdropOpacity}]}
+        />
       )
     }
+
+    const backdropOpacity = this.props.animatedValue.interpolate({
+      inputRange: [bottom, Math.min(top, backdropImageHeight)],
+      outputRange: [0, this.props.backdropOpacity],
+      extrapolate: 'clamp'
+    })
 
     return (
       <Animated.View
@@ -423,7 +431,11 @@ class SlidingUpPanel extends React.PureComponent {
         ref={c => (this._backdrop = c)}
         onTouchStart={() => this._flick.stop()}
         onTouchEnd={() => this.hide()}
-        style={[styles.backdrop, backdropStyle, {height: Dimensions.get('window').height * 0.35, opacity: backdropOpacity}]}>
+        style={[
+          styles.backdropWithImage,
+          backdropStyle,
+          {height: Dimensions.get('window').height * 0.35, opacity: backdropOpacity}
+        ]}>
           <Image
             source={{uri: backdropImage}}
             style={{width: '100%', height: '100%'}}
