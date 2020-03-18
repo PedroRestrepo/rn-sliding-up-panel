@@ -10,7 +10,8 @@ import {
   Animated,
   PanResponder,
   Platform,
-  Image
+  Image,
+  Dimensions
 } from 'react-native'
 
 import closest from './libs/closest'
@@ -55,6 +56,7 @@ class SlidingUpPanel extends React.PureComponent {
     showBackdrop: PropTypes.bool,
     backdropOpacity: PropTypes.number,
     backdropImage: PropTypes.string,
+    backdropImageHeight: PropTypes.number,
     friction: PropTypes.number,
     containerStyle: ViewPropTypes.style,
     backdropStyle: ViewPropTypes.style,
@@ -78,7 +80,8 @@ class SlidingUpPanel extends React.PureComponent {
     allowDragging: true,
     showBackdrop: true,
     backdropOpacity: 0.75,
-    backdropImage: '',
+    backdropImage: null,
+    backdropImageHeight: Dimensions.get('window').height * 0.6,
     friction: Constants.DEFAULT_FRICTION,
     onBottomReached: () => null
   }
@@ -140,6 +143,10 @@ class SlidingUpPanel extends React.PureComponent {
     this._animatedValueListener = this.props.animatedValue.addListener(
       this._onAnimatedValueChange.bind(this)
     )
+
+    this.state = {
+      currentValue: 0,
+    };
   }
 
   componentDidUpdate(prevProps) {
@@ -383,35 +390,31 @@ class SlidingUpPanel extends React.PureComponent {
     })
   }
 
-  _renderBackdropImage() {
-    const {backdropImage} = this.props
-
-    console.log(backdropImage)
-    if (!backdropImage) {
-      return null
-    }
-
-    return (
-      <Image
-        source={{uri: backdropImage}}
-        style={{width: '100%', height: '100%'}}
-      />
-    )
-  }
-
   _renderBackdrop() {
     if (!this.props.showBackdrop) {
       return null
     }
 
     const {top, bottom} = this.props.draggableRange
-    const {backdropStyle} = this.props
+    const {backdropStyle, backdropImage, backdropImageHeight} = this.props
 
     const backdropOpacity = this.props.animatedValue.interpolate({
-      inputRange: [bottom, top],
+      inputRange: [bottom, Math.min(top, backdropImageHeight)],
       outputRange: [0, this.props.backdropOpacity],
       extrapolate: 'clamp'
     })
+
+    if (!backdropImage) {
+      return (
+        <Animated.View
+          key="backdrop"
+          pointerEvents={this._backdropPointerEvents}
+          ref={c => (this._backdrop = c)}
+          onTouchStart={() => this._flick.stop()}
+          onTouchEnd={() => this.hide()}
+          style={[styles.backdrop, backdropStyle, {opacity: backdropOpacity}]} />
+      )
+    }
 
     return (
       <Animated.View
@@ -420,8 +423,11 @@ class SlidingUpPanel extends React.PureComponent {
         ref={c => (this._backdrop = c)}
         onTouchStart={() => this._flick.stop()}
         onTouchEnd={() => this.hide()}
-        style={[styles.backdrop, backdropStyle, {opacity: backdropOpacity}]}>
-        {this._renderBackdropImage()}
+        style={[styles.backdrop, backdropStyle, {height: Dimensions.get('window').height * 0.35, opacity: backdropOpacity}]}>
+          <Image
+            source={{uri: backdropImage}}
+            style={{width: '100%', height: '100%'}}
+          />
       </Animated.View>
     )
   }
@@ -432,7 +438,6 @@ class SlidingUpPanel extends React.PureComponent {
       draggableRange: {top, bottom},
       containerStyle
     } = this.props
-
     const translateY = this.props.animatedValue.interpolate({
       inputRange: [bottom, top],
       outputRange: [-bottom, -top],
@@ -450,28 +455,33 @@ class SlidingUpPanel extends React.PureComponent {
 
     if (typeof this.props.children === 'function') {
       return (
-        <Animated.View
-          key="content"
-          pointerEvents="box-none"
-          style={animatedContainerStyles}>
-          {this.props.children(this._panResponder.panHandlers)}
-        </Animated.View>
+        <>
+          <Animated.View
+            key="content"
+            pointerEvents="box-none"
+            style={animatedContainerStyles}>
+            {this.props.children(this._panResponder.panHandlers)}
+          </Animated.View>
+        </>
       )
     }
 
     return (
-      <Animated.View
-        key="content"
-        pointerEvents="box-none"
-        style={animatedContainerStyles}
-        {...this._panResponder.panHandlers}
-        disableScrollViewPanResponder>
-        {this.props.children}
-      </Animated.View>
+      <>
+        <Animated.View
+          key="content"
+          pointerEvents="box-none"
+          style={animatedContainerStyles}
+          {...this._panResponder.panHandlers}
+          disableScrollViewPanResponder>
+          {this.props.children}
+        </Animated.View>
+      </>
     )
   }
 
   render() {
+    // console.log('my value', this.state.currentValue)
     return [this._renderBackdrop(), this._renderContent()]
   }
 
